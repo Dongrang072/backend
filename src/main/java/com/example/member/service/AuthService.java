@@ -1,7 +1,13 @@
 package com.example.member.service;
 
+import com.example.member.dto.CheckCertificationRequest;
+import com.example.member.dto.EmailcertificationRequest;
+import com.example.member.entity.EmailAuth;
 import com.example.member.entity.User;
+import com.example.member.repository.EmailAuthRepository;
 import com.example.member.repository.UserRepository;
+import com.example.member.util.EmailProvider;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,40 +20,83 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final EmailAuthRepository emailAuthRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailProvider emailProvider;
 
-    // 1. 회원가입 (이메일 인증번호 파라미터 및 로직 제거)
-    @Transactional
+    // 1. 회원가입
     public User signup(String email, String password, String nickname) {
+        EmailAuth emailAuth = emailAuthRepository.findById(email)
+                .orElseThrow(() -> new RuntimeException("이메일 인증을 진행해주세요."));
 
-        // 계정 중복 확인
-        if (userRepository.findBySchoolEmail(email).isPresent()) {
-            throw new RuntimeException("이미 사용중인 이메일입니다.");
+        if (!emailAuth.isVerified()) {
+            throw new RuntimeException("이메일 인증이 완료되지 않았습니다.");
         }
 
-        // 닉네임 중복 확인
         if (userRepository.findByNickname(nickname).isPresent()) {
             throw new RuntimeException("이미 사용중인 닉네임입니다.");
         }
 
-        // 비밀번호 암호화 및 유저 객체 생성 (Builder 사용)
         User user = User.builder()
                 .schoolEmail(email)
                 .password(passwordEncoder.encode(password))
                 .nickname(nickname)
                 .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // 가입 성공 후 인증 데이터 삭제
+        emailAuthRepository.delete(emailAuth);
+
+        return savedUser;
     }
 
     // 2. 로그인
     public User login(String email, String password) {
         Optional<User> optionalUser = userRepository.findBySchoolEmail(email);
 
-        // 사용자가 존재하고, 암호화된 비밀번호가 일치하는지 확인
         if (optionalUser.isPresent() && passwordEncoder.matches(password, optionalUser.get().getPassword())) {
             return optionalUser.get();
         }
         return null;
+    }
+
+    // 3. 이메일 인증 발송
+    @Transactional
+    public void sendCertificationEmail(EmailcertificationRequest request) {
+        String email = request.getEmail();
+
+        if (userRepository.findBySchoolEmail(email).isPresent()) {
+            throw new RuntimeException("이미 가입된 이메일입니다.");
+        }
+
+        String certificationNumber = getCertificationNumber();
+
+        EmailAuth emailAuth = new EmailAuth(email, certificationNumber, false);
+        emailAuthRepository.save(emailAuth);
+
+        emailProvider.senderCertificationMail(email, certificationNumber);
+    }
+
+    // 4. 인증번호 검증 로직
+    @Transactional
+    public void verifyCertificationCode(CheckCertificationRequest request) {
+        EmailAuth emailAuth = emailAuthRepository.findById(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("인증 요청 기록이 없습니다."));
+
+        if (!emailAuth.getCertificationNumber().equals(request.getCertificationNumber())) {
+            throw new RuntimeException("인증번호가 일치하지 않습니다.");
+        }
+        emailAuth.setVerified(true);
+        emailAuthRepository.save(emailAuth);
+    }
+
+    //6자리 난수 생성
+    private String getCertificationNumber() {
+        StringBuilder certificationNumber = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            certificationNumber.append((int) (Math.random() * 10));
+        }
+        return certificationNumber.toString();
     }
 }

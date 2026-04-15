@@ -5,23 +5,24 @@ import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Data
-@NoArgsConstructor
+@Getter
+@Setter // 서비스 로직에서 값을 채워넣기 위해 클래스 레벨에 Setter 허용
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Getter
-@Setter
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String schoolEmail;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String nickname;
+
 }
