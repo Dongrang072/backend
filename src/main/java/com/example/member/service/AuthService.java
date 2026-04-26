@@ -8,7 +8,6 @@ import com.example.member.repository.EmailAuthRepository;
 import com.example.member.repository.UserRepository;
 import com.example.member.util.EmailProvider;
 import com.example.member.util.JwtUtil;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,6 +43,7 @@ public class AuthService {
                 .schoolEmail(email)
                 .password(passwordEncoder.encode(password))
                 .nickname(nickname)
+                .role("ROLE_STUDENT")
                 .department(department)
                 .grade(grade)
                 .build();
@@ -72,14 +72,23 @@ public class AuthService {
         return null;
     }
 
+    public String extendSessionToken(String originalToken) {
+        if (jwtUtil.validateToken(originalToken) && !redisService.hasKeyBlackList(originalToken)) {
+            String email = jwtUtil.extractEmail(originalToken);
+            userRepository.findBySchoolEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            return jwtUtil.generateToken(email);
+        }
+        throw new IllegalStateException("토큰이 유효하지 않습니다.");
+    }
+
     // 3. 이메일 인증 발송
     @Transactional
     public void sendCertificationEmail(EmailcertificationRequest request) {
         String email = request.getEmail();
 
-        if (userRepository.findBySchoolEmail(email).isPresent()) {
+        if (userRepository.findBySchoolEmail(email).isPresent())
             throw new RuntimeException("이미 가입된 이메일입니다.");
-        }
 
         String certificationNumber = getCertificationNumber();
 

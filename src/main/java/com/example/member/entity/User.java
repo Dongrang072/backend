@@ -16,7 +16,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "school_email", nullable = false, unique = true)
     private String schoolEmail;
 
     @Column
@@ -24,6 +24,12 @@ public class User {
 
     @Column
     private String nickname;
+
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
+    @Column
+    private String role;
 
     @Column
     private String department;

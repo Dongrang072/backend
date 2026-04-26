@@ -5,9 +5,9 @@ import com.example.member.entity.User;
 import com.example.member.service.AuthService;
 import com.example.member.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -96,6 +96,18 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.error("로그인 정보가 틀렸습니다."));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.error(e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "세션 토큰 확인", description = "세션이 유효하면 연장된 토큰을 반환합니다.")
+    @PostMapping("/validate")
+    public ResponseEntity<CommonResponse<String>> validateSessionToken(@RequestHeader(value = "Authorization", defaultValue = "") String token) {
+        try {
+            token = token.replace("Bearer ", "");
+            String newToken = authService.extendSessionToken(token);
+            return ResponseEntity.ok(CommonResponse.success(newToken));
+        } catch (RuntimeException exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.error(exception.getMessage()));
         }
     }
 

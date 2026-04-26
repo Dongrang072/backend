@@ -2,8 +2,6 @@ package com.example.member.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -11,19 +9,18 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+    // 토큰 만료 시간
+    private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24;
 
     // 1. 보안 키 생성
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-    // 토큰 만료 시간
-    private final long expirationTime = 1000L * 60 * 60 * 24;
+    private final SecretKey secretKey = Jwts.SIG.HS256.key().build();
 
     // 2. 토큰 생성
     public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .subject(email)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();
     }
