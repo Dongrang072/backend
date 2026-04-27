@@ -4,7 +4,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.zoopick.server.dto.FcmNotificationRequest;
+import com.zoopick.server.dto.fcm.FcmNotificationRequest;
 import com.zoopick.server.entity.User;
 import com.zoopick.server.repository.UserRepository;
 import com.zoopick.server.util.JwtUtil;

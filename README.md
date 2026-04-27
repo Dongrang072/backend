@@ -8,14 +8,14 @@
 ```bash .env
 # Optional
 # default: jdbc:postgresql://mir.lalaalal.com:5432/zoopick
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/zoopick
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/zoopick
 
 # Mandatory
-SPRING_DATASOURCE_PASSWORD=password
-SPRING_DATASOURCE_USERNAME=username
-FIREBASE_ACCOUNT_KEY_PATH=/path/to/firebase-adminsdk.json
-SPRING_MAIL_USERNAME=example@example.com
-SPRING_MAIL_PASSWORD=password
+export SPRING_DATASOURCE_PASSWORD=password
+export SPRING_DATASOURCE_USERNAME=username
+export FIREBASE_ACCOUNT_KEY_PATH=/path/to/firebase-adminsdk.json
+export SPRING_MAIL_USERNAME=example@example.com
+export SPRING_MAIL_PASSWORD=password
 ```
 
 ### 빌드

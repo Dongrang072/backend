@@ -1,7 +1,7 @@
 package com.zoopick.server.service;
 
-import com.zoopick.server.dto.CheckCertificationRequest;
-import com.zoopick.server.dto.EmailcertificationRequest;
+import com.zoopick.server.dto.auth.CheckCertificationRequest;
+import com.zoopick.server.dto.auth.EmailCertificationRequest;
 import com.zoopick.server.entity.EmailAuth;
 import com.zoopick.server.entity.User;
 import com.zoopick.server.repository.EmailAuthRepository;
@@ -18,7 +18,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
     private final UserRepository userRepository;
     private final EmailAuthRepository emailAuthRepository;
     private final PasswordEncoder passwordEncoder;
@@ -84,7 +83,7 @@ public class AuthService {
 
     // 3. 이메일 인증 발송
     @Transactional
-    public void sendCertificationEmail(EmailcertificationRequest request) {
+    public void sendCertificationEmail(EmailCertificationRequest request) {
         String email = request.getEmail();
 
         if (userRepository.findBySchoolEmail(email).isPresent())
@@ -133,12 +132,6 @@ public class AuthService {
         if (!jwtUtil.validateToken(accessToken)) {
             throw new RuntimeException("유효하지 않은 토큰입니다.");
         }
-
-        // 2. 토큰에서 이메일 추출
-        String email = jwtUtil.extractEmail(accessToken);
-
-        // 3. Refresh Token 삭제
-        redisService.deleteRefreshToken(email);
 
         // 4. Access Token 블랙리스트 등록 (순수 토큰값만 저장됨)
         long expiration = jwtUtil.getExpiration(accessToken);

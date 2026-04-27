@@ -1,4 +1,4 @@
-package com.zoopick.server.dto;
+package com.zoopick.server.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

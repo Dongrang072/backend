@@ -1,6 +1,10 @@
 package com.zoopick.server.controller;
 
-import com.zoopick.server.dto.*;
+import com.zoopick.server.dto.CommonResponse;
+import com.zoopick.server.dto.auth.CheckCertificationRequest;
+import com.zoopick.server.dto.auth.EmailCertificationRequest;
+import com.zoopick.server.dto.auth.LoginRequest;
+import com.zoopick.server.dto.auth.SignupRequest;
 import com.zoopick.server.entity.User;
 import com.zoopick.server.service.AuthService;
 import com.zoopick.server.util.JwtUtil;
@@ -23,11 +27,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class AuthController {
-
     private final AuthService authService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "1. 회원가입", description = "서버에 이메일 인증이 완료된 상태인지 확인 후 가입을 처리합니다.")
+    @Operation(summary = "회원가입", description = "서버에 이메일 인증이 완료된 상태인지 확인 후 가입을 처리합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "회원가입 성공"),
             @ApiResponse(responseCode = "400", description = "입력값 오류 또는 미인증 이메일")
@@ -53,7 +56,6 @@ public class AuthController {
         }
     }
 
-    // 닉네임 중복 체크 API
     @Operation(summary = "닉네임 중복 체크", description = "가입 전 닉네임 사용 가능 여부를 확인합니다.")
     @GetMapping("/check-nickname")
     public ResponseEntity<CommonResponse<Map<String, Object>>> checkNickname(@RequestParam String nickname) {
@@ -70,13 +72,12 @@ public class AuthController {
         return ResponseEntity.ok(CommonResponse.success(result));
     }
 
-    @Operation(summary = "2. 로그인", description = "이메일과 비밀번호로 로그인을 진행하고 JWT 토큰을 반환받습니다.")
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인을 진행하고 JWT 토큰을 반환받습니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공 및 토큰 발급"),
             @ApiResponse(responseCode = "401", description = "로그인 정보 불일치")
     })
     @PostMapping("/login")
-
     public ResponseEntity<CommonResponse<Map<String, Object>>> login(@RequestBody @Valid LoginRequest request) {
         try {
             User user = authService.login(request.getSchoolEmail(), request.getPassword());
@@ -100,6 +101,10 @@ public class AuthController {
     }
 
     @Operation(summary = "세션 토큰 확인", description = "세션이 유효하면 연장된 토큰을 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "401", description = "실패")
+    })
     @PostMapping("/validate")
     public ResponseEntity<CommonResponse<String>> validateSessionToken(@RequestHeader(value = "Authorization", defaultValue = "") String token) {
         try {
@@ -111,9 +116,9 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "3. 이메일 인증 번호 발송", description = "가입하려는 이메일로 인증 코드를 발송합니다.")
+    @Operation(summary = "이메일 인증 번호 발송", description = "가입하려는 이메일로 인증 코드를 발송합니다.")
     @PostMapping("/certification")
-    public ResponseEntity<CommonResponse<String>> sendCertificationEmail(@RequestBody @Valid EmailcertificationRequest request) {
+    public ResponseEntity<CommonResponse<String>> sendCertificationEmail(@RequestBody @Valid EmailCertificationRequest request) {
         try {
             authService.sendCertificationEmail(request);
             return ResponseEntity.ok(CommonResponse.success("인증 코드가 발송되었습니다."));
@@ -122,7 +127,7 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "4. 인증 번호 확인 (검증)", description = "이메일로 발송된 6자리 인증 번호가 맞는지 검증합니다.")
+    @Operation(summary = "인증 번호 확인 (검증)", description = "이메일로 발송된 6자리 인증 번호가 맞는지 검증합니다.")
     @PostMapping("/verify")
     public ResponseEntity<CommonResponse<String>> verifyCertificationCode(@RequestBody @Valid CheckCertificationRequest request) {
         try {
@@ -133,7 +138,7 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "5. 로그아웃", description = "Access Token을 블랙리스트에 등록하여 로그아웃을 처리합니다.")
+    @Operation(summary = "로그아웃", description = "Access Token을 블랙리스트에 등록하여 로그아웃을 처리합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
@@ -151,5 +156,4 @@ public class AuthController {
             return ResponseEntity.badRequest().body(CommonResponse.error(e.getMessage()));
         }
     }
-
 }

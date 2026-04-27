@@ -28,8 +28,8 @@ public class FirebaseConfig {
                     .build();
 
             FirebaseApp.initializeApp(options);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+        } catch (IOException exception) {
+            LOGGER.error(exception.getMessage(), exception);
         }
     }
 }

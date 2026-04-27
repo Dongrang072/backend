@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class RedisService {
-
     private final StringRedisTemplate redisTemplate;
 
     // Refresh Token 삭제
+    @Deprecated
     public void deleteRefreshToken(String email) {
         redisTemplate.delete("RT:" + email);
     }
