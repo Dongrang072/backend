@@ -3,8 +3,8 @@ package com.zoopick.server.controller;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.zoopick.server.dto.CommonResponse;
 import com.zoopick.server.dto.notification.FcmTokenRegistrationRequest;
+import com.zoopick.server.dto.notification.NotificationRequest;
 import com.zoopick.server.dto.notification.NotificationResponse;
-import com.zoopick.server.dto.notification.SimpleNotificationRequest;
 import com.zoopick.server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,13 +48,27 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "닉네임을 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "FirebaseMessaging 오류")
     })
-    @PostMapping("/admin/send/{targetNickname}")
+    @PostMapping("/admin/notifications/users/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<String>> sendNotification(
-            @PathVariable String targetNickname,
-            @RequestBody @Valid SimpleNotificationRequest request
+            @PathVariable long userId,
+            @RequestBody @Valid NotificationRequest request
     ) throws FirebaseMessagingException {
-        String result = notificationService.send(targetNickname, request);
+        String result = notificationService.send(userId, request);
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+    @Operation(summary = "모든 사용자에게 알림 전송", description = "모든 사용자에게 알림을 보냅니다. (ADMIN)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "알림 전송 성공"),
+            @ApiResponse(responseCode = "500", description = "FirebaseMessaging 오류")
+    })
+    @PostMapping("/admin/notifications/broadcast")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponse<String>> broadcastNotification(
+            @RequestBody @Valid NotificationRequest request
+    ) throws FirebaseMessagingException {
+        String result = notificationService.broadcast(request);
         return ResponseEntity.ok(CommonResponse.success(result));
     }
 

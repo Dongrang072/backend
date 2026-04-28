@@ -1,6 +1,7 @@
 package com.zoopick.server.dto.notification;
 
 
+import com.zoopick.server.entity.NotificationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,8 +9,9 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class SimpleNotificationRequest {
+public class NotificationRequest {
     private String title;
     private String body;
-    private Map<String, String> data = Map.of();
+    private NotificationType type;
+    private Map<String, String> payload = Map.of();
 }
