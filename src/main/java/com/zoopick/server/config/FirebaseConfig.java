@@ -23,9 +23,7 @@ public class FirebaseConfig {
     public void setupFirebase() {
         if (accountKeyPath == null)
             throw new IllegalStateException("firebase.account_key.path is not set!");
-        try {
-            FileInputStream serviceAccount = new FileInputStream(accountKeyPath);
-
+        try (FileInputStream serviceAccount = new FileInputStream(accountKeyPath)) {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
