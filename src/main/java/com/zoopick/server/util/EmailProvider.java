@@ -3,6 +3,7 @@ package com.zoopick.server.util;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-@Async
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @NullMarked
@@ -27,17 +28,22 @@ public class EmailProvider {
     private Resource resource;
     private final JavaMailSender javaMailSender;
 
-    public void senderCertificationMail(String email, String certificationNumber) throws MessagingException, IOException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+    @Async("zoopickTaskExecutor")
+    public void senderCertificationMail(String email, String certificationNumber) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
-        String htmlContent = getCertificationMessage(certificationNumber);
+            String htmlContent = getCertificationMessage(certificationNumber);
 
-        messageHelper.setTo(email);
-        messageHelper.setSubject(SUBJECT);
-        messageHelper.setText(htmlContent, true);
+            messageHelper.setTo(email);
+            messageHelper.setSubject(SUBJECT);
+            messageHelper.setText(htmlContent, true);
 
-        javaMailSender.send(message);
+            javaMailSender.send(message);
+        } catch (MessagingException | IOException exception) {
+            log.error("Failed to send email", exception);
+        }
     }
 
     private String getCertificationMessage(String certificationNumber) throws IOException {
