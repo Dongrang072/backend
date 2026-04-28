@@ -33,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (tokenValidationService.validateToken(token)) {
             String email = jwtUtil.extractEmail(token);
             userRepository.findBySchoolEmail(email).ifPresent(user -> {
+                request.setAttribute("accessToken", token);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email, null, user.getAuthorities()
                 );

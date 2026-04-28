@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
@@ -90,8 +91,8 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "실패")
     })
     @PostMapping("/validate")
-    public ResponseEntity<CommonResponse<String>> validateAccessToken(@RequestHeader(value = "Authorization", defaultValue = "") String accessToken) {
-        accessToken = accessToken.replace("Bearer ", "");
+    public ResponseEntity<CommonResponse<String>> validateAccessToken(HttpServletRequest request) {
+        String accessToken = request.getAttribute("accessToken").toString();
         String newToken = authService.validateAccessToken(accessToken);
         return ResponseEntity.ok(CommonResponse.success(newToken));
     }
@@ -119,9 +120,9 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<CommonResponse<String>> logout(
-            @RequestHeader(value = "Authorization", defaultValue = "") String accessToken
+            HttpServletRequest request
     ) {
-        accessToken = accessToken.replace("Bearer ", "");
+        String accessToken = request.getAttribute("accessToken").toString();
         authService.logout(accessToken);
         return ResponseEntity.ok(CommonResponse.success("로그아웃이 완료되었습니다."));
     }

@@ -2,8 +2,8 @@ package com.zoopick.server.controller;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.zoopick.server.dto.CommonResponse;
-import com.zoopick.server.dto.fcm.FcmNotificationRequest;
-import com.zoopick.server.dto.fcm.FcmTokenRegistrationRequest;
+import com.zoopick.server.dto.notification.FcmTokenRegistrationRequest;
+import com.zoopick.server.dto.notification.SimpleNotificationRequest;
 import com.zoopick.server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,7 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Notification API", description = "FCM 토큰을 등록 및 알림 전송")
 @RestController
@@ -30,11 +34,11 @@ public class NotificationController {
     })
     @PostMapping("/api/auth/device-token")
     public ResponseEntity<CommonResponse<String>> registerFcmToken(
-            @RequestHeader(value = "Authorization", defaultValue = "") String accessToken,
+            Authentication authentication,
             @RequestBody @Valid FcmTokenRegistrationRequest request
     ) {
-        accessToken = accessToken.replace("Bearer ", "");
-        notificationService.register(accessToken, request.getToken());
+        String email = authentication.getName();
+        notificationService.register(email, request.getToken());
         return ResponseEntity.ok(CommonResponse.success("FCM 토큰이 등록되었습니다."));
     }
 
@@ -47,8 +51,8 @@ public class NotificationController {
     @PostMapping("/admin/send/{targetNickname}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<String>> sendNotification(
-            @PathVariable("targetNickname") String targetNickname,
-            @RequestBody @Valid FcmNotificationRequest request
+            @PathVariable String targetNickname,
+            @RequestBody @Valid SimpleNotificationRequest request
     ) throws FirebaseMessagingException {
         String result = notificationService.send(targetNickname, request);
         return ResponseEntity.ok(CommonResponse.success(result));
