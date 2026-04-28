@@ -92,7 +92,7 @@ public class AuthService {
         if (tokenValidationService.validateTokenOrThrow(originalToken)) {
             String email = jwtUtil.extractEmail(originalToken);
             userRepository.findBySchoolEmail(email)
-                    .orElseThrow(() -> new DataNotFoundException(DataNotFoundException.Subject.USER, email + " is not in UserRepository"));
+                    .orElseThrow(() -> DataNotFoundException.from("사용자", email));
             tokenValidationService.invalidateToken(originalToken);
             return jwtUtil.generateToken(email);
         }

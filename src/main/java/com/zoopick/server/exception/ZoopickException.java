@@ -6,8 +6,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 /**
- * 클라이언트 요청에 대한 예외<br/>
- * <p>
  * {@link ZoopickException#statusCode}는 {@linkplain ResponseEntity}를 제공할 때 사용 할 상태 코드이다.
  * 내부에서만 값을 설정하고 노출시키지 않는다.<br/>
  * {@link ZoopickException#clientMessage} 클라이언트로 보낼 메시지

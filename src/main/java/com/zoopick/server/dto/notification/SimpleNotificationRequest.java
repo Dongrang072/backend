@@ -1,4 +1,4 @@
-package com.zoopick.server.dto.fcm;
+package com.zoopick.server.dto.notification;
 
 
 import lombok.Getter;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class FcmNotificationRequest {
+public class SimpleNotificationRequest {
     private String title;
     private String body;
     private Map<String, String> data = Map.of();

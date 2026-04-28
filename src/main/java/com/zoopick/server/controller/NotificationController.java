@@ -3,6 +3,7 @@ package com.zoopick.server.controller;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.zoopick.server.dto.CommonResponse;
 import com.zoopick.server.dto.notification.FcmTokenRegistrationRequest;
+import com.zoopick.server.dto.notification.NotificationResponse;
 import com.zoopick.server.dto.notification.SimpleNotificationRequest;
 import com.zoopick.server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,10 +16,9 @@ import org.jspecify.annotations.NullMarked;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Notification API", description = "FCM 토큰을 등록 및 알림 전송")
 @RestController
@@ -56,5 +56,29 @@ public class NotificationController {
     ) throws FirebaseMessagingException {
         String result = notificationService.send(targetNickname, request);
         return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+    @Operation(summary = "모든 알림 확인", description = "해당 사용자의 모든 알림을 불러옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
+    @GetMapping("/api/notifications")
+    public ResponseEntity<CommonResponse<List<NotificationResponse.Data>>> getNotifications(Authentication authentication) {
+        String email = authentication.getName();
+        List<NotificationResponse.Data> notifications = notificationService.getNotifications(email);
+        return ResponseEntity.ok(NotificationResponse.success(notifications));
+    }
+
+    @Operation(summary = "읽지 않은 알림 확인", description = "해당 사용자의 아직 읽지 않은 알림을 불러옵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
+    @GetMapping("/api/notifications/unread")
+    public ResponseEntity<CommonResponse<List<NotificationResponse.Data>>> getUnReadNotifications(Authentication authentication) {
+        String email = authentication.getName();
+        List<NotificationResponse.Data> notifications = notificationService.getUnreadNotifications(email);
+        return ResponseEntity.ok(NotificationResponse.success(notifications));
     }
 }

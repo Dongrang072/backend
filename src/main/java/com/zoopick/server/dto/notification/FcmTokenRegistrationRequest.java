@@ -1,4 +1,4 @@
-package com.zoopick.server.dto.fcm;
+package com.zoopick.server.dto.notification;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
