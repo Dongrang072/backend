@@ -3,6 +3,7 @@ package com.zoopick.server.util;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 @Async
 @Component
 @RequiredArgsConstructor
+@NullMarked
 public class EmailProvider {
     private static final String SUBJECT = "[명지대 분실물 찾기 서비스] 인증메일 입니다.";
 

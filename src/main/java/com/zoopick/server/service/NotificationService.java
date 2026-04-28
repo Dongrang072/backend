@@ -11,10 +11,12 @@ import com.zoopick.server.exception.DataNotFoundException;
 import com.zoopick.server.repository.UserRepository;
 import com.zoopick.server.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@NullMarked
 public class NotificationService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;

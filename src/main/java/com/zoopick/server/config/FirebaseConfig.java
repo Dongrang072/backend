@@ -4,17 +4,15 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 
+@Slf4j
 @Configuration
 public class FirebaseConfig {
-    private static final Log LOGGER = LogFactory.getLog(FirebaseConfig.class);
-
     @PostConstruct
     public void setupFirebase() {
         if (!System.getenv().containsKey("FIREBASE_ACCOUNT_KEY_PATH"))
@@ -29,7 +27,7 @@ public class FirebaseConfig {
 
             FirebaseApp.initializeApp(options);
         } catch (IOException exception) {
-            LOGGER.error(exception.getMessage(), exception);
+            log.error(exception.getMessage(), exception);
         }
     }
 }
