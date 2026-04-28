@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
@@ -28,22 +27,17 @@ public class EmailProvider {
     private Resource resource;
     private final JavaMailSender javaMailSender;
 
-    @Async("zoopickTaskExecutor")
-    public void senderCertificationMail(String email, String certificationNumber) {
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+    public void senderCertificationMail(String email, String certificationNumber) throws MessagingException, IOException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
-            String htmlContent = getCertificationMessage(certificationNumber);
+        String htmlContent = getCertificationMessage(certificationNumber);
 
-            messageHelper.setTo(email);
-            messageHelper.setSubject(SUBJECT);
-            messageHelper.setText(htmlContent, true);
+        messageHelper.setTo(email);
+        messageHelper.setSubject(SUBJECT);
+        messageHelper.setText(htmlContent, true);
 
-            javaMailSender.send(message);
-        } catch (MessagingException | IOException exception) {
-            log.error("Failed to send email", exception);
-        }
+        javaMailSender.send(message);
     }
 
     private String getCertificationMessage(String certificationNumber) throws IOException {

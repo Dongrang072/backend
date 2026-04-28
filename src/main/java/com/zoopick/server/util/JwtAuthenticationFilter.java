@@ -1,7 +1,5 @@
 package com.zoopick.server.util;
 
-import com.zoopick.server.entity.User;
-import com.zoopick.server.exception.DataNotFoundException;
 import com.zoopick.server.repository.UserRepository;
 import com.zoopick.server.service.TokenValidationService;
 import jakarta.servlet.FilterChain;
@@ -34,14 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (tokenValidationService.validateToken(token)) {
             String email = jwtUtil.extractEmail(token);
-            User user = userRepository.findBySchoolEmail(email)
-                    .orElseThrow(() -> new DataNotFoundException(DataNotFoundException.Subject.USER, email + " is not in UserRepository"));
-
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    email, null, user.getAuthorities()
-            );
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            userRepository.findBySchoolEmail(email).ifPresent(user -> {
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        email, null, user.getAuthorities()
+                );
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            });
         }
 
         filterChain.doFilter(request, response);

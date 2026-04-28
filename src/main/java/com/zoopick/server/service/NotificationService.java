@@ -33,6 +33,9 @@ public class NotificationService {
             throws DataNotFoundException, FirebaseMessagingException {
         User user = userRepository.findByNickname(targetNickname)
                 .orElseThrow(() -> new DataNotFoundException(DataNotFoundException.Subject.USER, targetNickname + " is not in UserRepository."));
+        String fcmToken = user.getFcmToken();
+        if (fcmToken == null)
+            throw new DataNotFoundException(DataNotFoundException.Subject.FCM_TOKEN, user.getSchoolEmail() + " did not registered fcm token.");
         Notification notification = Notification.builder()
                 .setTitle(request.getTitle())
                 .setBody(request.getBody())
@@ -40,7 +43,7 @@ public class NotificationService {
         Message message = Message.builder()
                 .setNotification(notification)
                 .putAllData(request.getData())
-                .setToken(user.getFcmToken())
+                .setToken(fcmToken)
                 .build();
         return FirebaseMessaging.getInstance().send(message);
     }

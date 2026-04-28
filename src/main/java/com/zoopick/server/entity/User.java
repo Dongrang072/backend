@@ -1,5 +1,6 @@
 package com.zoopick.server.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,10 +26,11 @@ public class User {
     @Column
     private String password;
 
-    @Column
+    @Column(unique = true)
     private String nickname;
 
     @Column(name = "fcm_token")
+    @Nullable
     private String fcmToken;
 
     @Column
