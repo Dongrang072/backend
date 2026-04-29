@@ -1,5 +1,6 @@
 package com.zoopick.server.service;
 
+import com.zoopick.server.config.FastApiProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,13 +13,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VisionService {
     private final RestTemplate restTemplate;
-
-    // fast api 주소
-    private final String FASTAPI_URL = "http://localhost:8000/vision/analyze";
+    private final FastApiProperties fastApiProperties;
 
     public VisionAnalyzeResponse analyzeImage(String imageUrl) {
         VisionAnalyzeRequest request = new VisionAnalyzeRequest(imageUrl);
-        return restTemplate.postForObject(FASTAPI_URL, request, VisionAnalyzeResponse.class);
+        String url = fastApiProperties.getBaseUrl() +
+                fastApiProperties.getVision().getAnalyzePath();
+        return restTemplate.postForObject(url, request, VisionAnalyzeResponse.class);
     }
 
 }
