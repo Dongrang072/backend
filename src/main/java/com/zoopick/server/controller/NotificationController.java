@@ -3,8 +3,8 @@ package com.zoopick.server.controller;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.zoopick.server.dto.CommonResponse;
 import com.zoopick.server.dto.notification.FcmTokenRegistrationRequest;
-import com.zoopick.server.dto.notification.NotificationRequest;
-import com.zoopick.server.dto.notification.NotificationResponse;
+import com.zoopick.server.dto.notification.NotificationRecord;
+import com.zoopick.server.dto.notification.SendNotificationRequest;
 import com.zoopick.server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -52,7 +52,7 @@ public class NotificationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<String>> sendNotification(
             @PathVariable long userId,
-            @RequestBody @Valid NotificationRequest request
+            @RequestBody @Valid SendNotificationRequest request
     ) throws FirebaseMessagingException {
         String result = notificationService.send(userId, request);
         return ResponseEntity.ok(CommonResponse.success(result));
@@ -66,7 +66,7 @@ public class NotificationController {
     @PostMapping("/admin/notifications/broadcast")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<String>> broadcastNotification(
-            @RequestBody @Valid NotificationRequest request
+            @RequestBody @Valid SendNotificationRequest request
     ) throws FirebaseMessagingException {
         String result = notificationService.broadcast(request);
         return ResponseEntity.ok(CommonResponse.success(result));
@@ -78,10 +78,10 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @GetMapping("/api/notifications")
-    public ResponseEntity<CommonResponse<List<NotificationResponse.Data>>> getNotifications(Authentication authentication) {
+    public ResponseEntity<CommonResponse<List<NotificationRecord>>> getNotifications(Authentication authentication) {
         String email = authentication.getName();
-        List<NotificationResponse.Data> notifications = notificationService.getNotifications(email);
-        return ResponseEntity.ok(NotificationResponse.success(notifications));
+        List<NotificationRecord> notificationRecords = notificationService.getNotifications(email);
+        return ResponseEntity.ok(CommonResponse.success(notificationRecords));
     }
 
     @Operation(summary = "읽지 않은 알림 확인", description = "해당 사용자의 아직 읽지 않은 알림을 불러옵니다.")
@@ -90,9 +90,9 @@ public class NotificationController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @GetMapping("/api/notifications/unread")
-    public ResponseEntity<CommonResponse<List<NotificationResponse.Data>>> getUnReadNotifications(Authentication authentication) {
+    public ResponseEntity<CommonResponse<List<NotificationRecord>>> getUnReadNotifications(Authentication authentication) {
         String email = authentication.getName();
-        List<NotificationResponse.Data> notifications = notificationService.getUnreadNotifications(email);
-        return ResponseEntity.ok(NotificationResponse.success(notifications));
+        List<NotificationRecord> notificationRecords = notificationService.getUnreadNotifications(email);
+        return ResponseEntity.ok(CommonResponse.success(notificationRecords));
     }
 }

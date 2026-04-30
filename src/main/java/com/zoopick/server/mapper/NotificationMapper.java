@@ -2,8 +2,8 @@ package com.zoopick.server.mapper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zoopick.server.dto.notification.NotificationRequest;
-import com.zoopick.server.dto.notification.NotificationResponse;
+import com.zoopick.server.dto.notification.NotificationRecord;
+import com.zoopick.server.dto.notification.SendNotificationRequest;
 import com.zoopick.server.entity.User;
 import com.zoopick.server.entity.ZoopickNotification;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +17,20 @@ import java.util.Map;
 public class NotificationMapper {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public NotificationResponse.Data toNotificationResponse(ZoopickNotification notification) {
-        NotificationResponse.Data data = new NotificationResponse.Data();
-        data.setId(notification.getId());
-        data.setType(notification.getType());
-        data.setCreatedAt(notification.getCreatedAt());
+    public NotificationRecord toNotificationResponse(ZoopickNotification notification) {
+        NotificationRecord notificationRecord = new NotificationRecord();
+        notificationRecord.setId(notification.getId());
+        notificationRecord.setType(notification.getType());
+        notificationRecord.setCreatedAt(notification.getCreatedAt());
         Map<String, Object> payload = objectMapper.convertValue(notification.getPayload(), new TypeReference<>() {
         });
-        data.setPayload(payload);
-        data.setReadAt(notification.getReadAt());
+        notificationRecord.setPayload(payload);
+        notificationRecord.setReadAt(notification.getReadAt());
 
-        return data;
+        return notificationRecord;
     }
 
-    public ZoopickNotification toZoopickNotification(User user, NotificationRequest request) {
+    public ZoopickNotification toZoopickNotification(User user, SendNotificationRequest request) {
         return ZoopickNotification.builder()
                 .user(user)
                 .createdAt(LocalDateTime.now())
