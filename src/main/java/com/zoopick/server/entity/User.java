@@ -3,6 +3,8 @@ package com.zoopick.server.entity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -33,8 +35,10 @@ public class User {
     @Nullable
     private String fcmToken;
 
-    @Column
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, columnDefinition = "user_role")
+    private Role role;
 
     @Column(length = 50, nullable = false)
     private String department;
@@ -43,6 +47,6 @@ public class User {
     private String grade;
 
     public List<GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 }
