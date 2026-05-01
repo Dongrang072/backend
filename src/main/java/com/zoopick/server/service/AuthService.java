@@ -1,9 +1,6 @@
 package com.zoopick.server.service;
 
-import com.zoopick.server.dto.auth.CheckCertificationRequest;
-import com.zoopick.server.dto.auth.EmailCertificationRequest;
-import com.zoopick.server.dto.auth.LoginRequest;
-import com.zoopick.server.dto.auth.SignupRequest;
+import com.zoopick.server.dto.auth.*;
 import com.zoopick.server.entity.EmailAuth;
 import com.zoopick.server.entity.User;
 import com.zoopick.server.exception.AccessTokenException;
@@ -42,7 +39,7 @@ public class AuthService {
         return LocalDateTime.now().plusMinutes(EMAIL_CERTIFICATION_EXPIRE_DURATION);
     }
 
-    public User signup(SignupRequest request) {
+    public SignupResult signup(SignupRequest request) {
         EmailAuth emailAuth = emailAuthRepository.findById(request.getSchoolEmail())
                 .orElseThrow(() -> new BadRequestException("이메일 인증을 진행해주세요.", request.getSchoolEmail() + " is not certificated."));
         if (!emailAuth.isVerified())
@@ -66,19 +63,31 @@ public class AuthService {
         User savedUser = userRepository.save(user);
         emailAuthRepository.delete(emailAuth);
 
-        return savedUser;
+        String accessToken = jwtUtil.generateToken(savedUser.getSchoolEmail());
+
+        return new SignupResult(savedUser.getId(), "회원가입이 완료되었습니다.", accessToken);
     }
 
-    public boolean checkNickname(String nickname) {
-        return userRepository.findByNickname(nickname).isEmpty();
+    public NicknameCheckResult checkNickname(String nickname) {
+        if (userRepository.findByNickname(nickname).isEmpty())
+            return new NicknameCheckResult(true, "사용 가능한 닉네임입니다.");
+        throw new BadRequestException("이미 사용 중인 닉네임입니다.", nickname + " is already in use.");
     }
 
-    public User login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         User user = userRepository.findBySchoolEmail(request.getSchoolEmail())
                 .orElseThrow(() -> new BadRequestException("로그인에 실패했습니다.", request.getSchoolEmail() + " is not in UserRepository"));
 
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            return user;
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            String accessToken = jwtUtil.generateToken(user.getSchoolEmail());
+            return LoginResult.builder()
+                    .accessToken(accessToken)
+                    .grade(user.getGrade())
+                    .department(user.getDepartment())
+                    .nickname(user.getNickname())
+                    .message("로그인 성공")
+                    .build();
+        }
         throw new BadRequestException("로그인에 실패했습니다.", request.getSchoolEmail() + " failed password.");
     }
 

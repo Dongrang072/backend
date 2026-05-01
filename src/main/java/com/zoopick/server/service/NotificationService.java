@@ -4,8 +4,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.zoopick.server.dto.notification.NotificationRequest;
-import com.zoopick.server.dto.notification.NotificationResponse;
+import com.zoopick.server.dto.notification.NotificationRecord;
+import com.zoopick.server.dto.notification.SendNotificationRequest;
 import com.zoopick.server.entity.User;
 import com.zoopick.server.entity.ZoopickNotification;
 import com.zoopick.server.exception.AccessTokenException;
@@ -35,7 +35,7 @@ public class NotificationService {
         userRepository.save(user);
     }
 
-    public String send(long userId, NotificationRequest request)
+    public String send(long userId, SendNotificationRequest request)
             throws DataNotFoundException, FirebaseMessagingException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> DataNotFoundException.from("사용자", userId));
@@ -57,7 +57,7 @@ public class NotificationService {
         return FirebaseMessaging.getInstance().send(message);
     }
 
-    public String broadcast(NotificationRequest request) throws FirebaseMessagingException {
+    public String broadcast(SendNotificationRequest request) throws FirebaseMessagingException {
         Notification notification = Notification.builder()
                 .setTitle(request.getTitle())
                 .setBody(request.getBody())
@@ -81,15 +81,15 @@ public class NotificationService {
         return FirebaseMessaging.getInstance().sendEach(messages).toString();
     }
 
-    public List<NotificationResponse.Data> getNotifications(String email) {
+    public List<NotificationRecord> getNotifications(String email) {
         return findNotificationsWith(email, notificationRepository::findByUserIdOrderByCreatedAtDesc);
     }
 
-    public List<NotificationResponse.Data> getUnreadNotifications(String email) {
+    public List<NotificationRecord> getUnreadNotifications(String email) {
         return findNotificationsWith(email, notificationRepository::findByUserIdAndReadAtIsNullOrderByCreatedAtDesc);
     }
 
-    private List<NotificationResponse.Data> findNotificationsWith(String email, Function<Long, List<ZoopickNotification>> repositoryAccessor) {
+    private List<NotificationRecord> findNotificationsWith(String email, Function<Long, List<ZoopickNotification>> repositoryAccessor) {
         User user = userRepository.findBySchoolEmail(email)
                 .orElseThrow(() -> DataNotFoundException.from("사용자", email));
 

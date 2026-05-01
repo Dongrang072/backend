@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class NotificationRequest {
+public class SendNotificationRequest {
     private String title;
     private String body;
     private NotificationType type;
