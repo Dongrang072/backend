@@ -1,0 +1,11 @@
+### 1. ITEM 이미지 업로드
+POST {{baseUrl}}/api/images/upload/item
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=ZoopickBoundary
+
+--ZoopickBoundary
+Content-Disposition: form-data; name="image"; filename="test.png"
+Content-Type: image/png
+
+< test/test.png
+--ZoopickBoundary--
