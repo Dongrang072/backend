@@ -1,5 +1,7 @@
 package com.zoopick.server.entity;
 
+import com.zoopick.server.exception.BadRequestException;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -10,13 +12,14 @@ public enum NotificationType {
     THEFT_SUSPECTED("item_id"),
     LOCKER_READY("item_id");
 
-    private final Set<String> allowedPayloadKeys;
+    public final Set<String> requiredPayloadKeys;
 
-    NotificationType(String... allowedPayloadKeys) {
-        this.allowedPayloadKeys = Set.of(allowedPayloadKeys);
+    NotificationType(String... requiredPayloadKeys) {
+        this.requiredPayloadKeys = Set.of(requiredPayloadKeys);
     }
 
-    public boolean verifyPayload(Map<String, String> payload) {
-        return payload.keySet().containsAll(this.allowedPayloadKeys);
+    public void validatePayload(Map<String, String> payload) {
+        if (payload.keySet().containsAll(this.requiredPayloadKeys))
+            throw new BadRequestException("잘못된 알림 요청입니다.", "type: " + this + " required: " + requiredPayloadKeys);
     }
 }

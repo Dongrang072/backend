@@ -2,18 +2,18 @@ package com.zoopick.server.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "chat_rooms", schema = "zoopick")
 public class ChatRoom {
@@ -42,8 +42,6 @@ public class ChatRoom {
     @NotNull
     @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
-    @OneToMany(mappedBy = "room")
-    private Set<ChatMessage> chatMessages = new LinkedHashSet<>();
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
